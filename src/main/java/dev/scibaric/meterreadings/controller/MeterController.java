@@ -1,8 +1,16 @@
 package dev.scibaric.meterreadings.controller;
 
 import dev.scibaric.meterreadings.dto.MeterReadingDTO;
+import dev.scibaric.meterreadings.exception.ApiExceptionResponse;
 import dev.scibaric.meterreadings.exception.ResourceNotFoundException;
 import dev.scibaric.meterreadings.service.MeterService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -30,8 +38,28 @@ public class MeterController {
      * @throws ResourceNotFoundException If results are not found
      * @return ResponseEntity<MeterReadingDTO>
      */
+    @Operation(summary = "Aggregates electricity consumption",
+            description = "Aggregates electricity consumption by meter id and year")
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Returns electricity consumption aggregated by meter and year",
+                    content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = MeterReadingDTO.class))}),
+            @ApiResponse(responseCode = "400", description = "Meter id or year not valid",
+                    content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = ApiExceptionResponse.class))}),
+            @ApiResponse(responseCode = "404", description = "Meter readings do not exist",
+                    content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = ApiExceptionResponse.class))}),
+            @ApiResponse(responseCode = "500", description = "Service error",
+                    content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = ApiExceptionResponse.class))})
+    })
     @GetMapping("/{id}/consumption/aggregation/year/{year}")
-    public ResponseEntity<MeterReadingDTO> aggregateConsumptionByMeterIdAndYear(@PathVariable Long id, @PathVariable Integer year) {
+    public ResponseEntity<MeterReadingDTO> aggregateConsumptionByMeterIdAndYear(
+            @PathVariable @Parameter(description = "Meter id", example = "1") Long id,
+            @PathVariable @Parameter(description = "Year", example = "2020") Integer year) {
         return ResponseEntity.ok(service.aggregateConsumptionByMeterIdAndYear(id, year));
     }
 
@@ -49,8 +77,28 @@ public class MeterController {
      * @throws ResourceNotFoundException If results are not found
      * @return {@link ResponseEntity<MeterReadingDTO>}
      */
+    @Operation(summary = "Returns meter readings for year",
+            description = "Returns meter readings for year by meter id")
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Returns meter readings for year",
+                    content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = MeterReadingDTO.class))}),
+            @ApiResponse(responseCode = "400", description = "Meter id or year not valid",
+                    content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = ApiExceptionResponse.class))}),
+            @ApiResponse(responseCode = "404", description = "Meter readings do not exist",
+                    content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = ApiExceptionResponse.class))}),
+            @ApiResponse(responseCode = "500", description = "Service error",
+                    content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = ApiExceptionResponse.class))})
+    })
     @GetMapping("/{id}/year/{year}")
-    public ResponseEntity<MeterReadingDTO> findByMeterIdAndYear(@PathVariable Long id, @PathVariable Integer year) {
+    public ResponseEntity<MeterReadingDTO> findByMeterIdAndYear(
+            @PathVariable @Parameter(description = "Meter id", example = "1") Long id,
+            @PathVariable @Parameter(description = "Year", example = "2020") Integer year) {
         return ResponseEntity.ok(service.findByMeterIdAndYear(id, year));
     }
 
@@ -69,10 +117,29 @@ public class MeterController {
      * @throws ResourceNotFoundException If results are not found
      * @return {@link ResponseEntity<MeterReadingDTO>}
      */
+    @Operation(summary = "Returns meter readings for year and month",
+            description = "Returns meter readings for year and month by meter id")
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Returns meter readings for year and month",
+                    content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = MeterReadingDTO.class))}),
+            @ApiResponse(responseCode = "400", description = "Meter id, year or month not valid",
+                    content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = ApiExceptionResponse.class))}),
+            @ApiResponse(responseCode = "404", description = "Meter readings do not exist",
+                    content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = ApiExceptionResponse.class))}),
+            @ApiResponse(responseCode = "500", description = "Service error",
+                    content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = ApiExceptionResponse.class))})
+    })
     @GetMapping("/{id}/year/{year}/month/{month}")
-    public ResponseEntity<MeterReadingDTO> findByMeterIdAndYearAndMonth(@PathVariable Long id,
-                                                                        @PathVariable Integer year,
-                                                                        @PathVariable Integer month) {
+    public ResponseEntity<MeterReadingDTO> findByMeterIdAndYearAndMonth(
+            @PathVariable @Parameter(description = "Meter id", example = "1") Long id,
+            @PathVariable @Parameter(description = "Year", example = "2020") Integer year,
+            @PathVariable @Parameter(description = "Month", example = "2") Integer month) {
         return ResponseEntity.ok(service.findByMeterIdAndYearAndMonth(id, year, month));
     }
 
@@ -90,6 +157,21 @@ public class MeterController {
      * year and month exist.
      * @return {@link ResponseEntity<MeterReadingDTO>}
      */
+    @Operation(summary = "Save meter reading", description = "Save meter reading to database")
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "201",
+                    description = "Save meter reading",
+                    content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = MeterReadingDTO.class))}),
+            @ApiResponse(responseCode = "400",
+                    description = "Meter id, year, month not valid or meter reading already exist",
+                    content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = ApiExceptionResponse.class))}),
+            @ApiResponse(responseCode = "500", description = "Service error",
+                    content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = ApiExceptionResponse.class))})
+    })
     @PostMapping("/reading")
     public ResponseEntity<MeterReadingDTO> saveMeterReading(@RequestBody MeterReadingDTO meterReadingDTO) {
         return ResponseEntity.created(null).body(service.saveMeterReading(meterReadingDTO));
@@ -109,6 +191,21 @@ public class MeterController {
      * year and month does not exist.
      * @return {@link ResponseEntity<MeterReadingDTO>}
      */
+    @Operation(summary = "Update meter reading", description = "Update meter reading to database")
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Update meter reading",
+                    content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = MeterReadingDTO.class))}),
+            @ApiResponse(responseCode = "400",
+                    description = "Meter id, year, month not valid or meter reading for update does not exist",
+                    content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = ApiExceptionResponse.class))}),
+            @ApiResponse(responseCode = "500", description = "Service error",
+                    content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = ApiExceptionResponse.class))})
+    })
     @PutMapping("/reading")
     public ResponseEntity<MeterReadingDTO> updateMeterReading(@RequestBody MeterReadingDTO meterReadingDTO) {
         return ResponseEntity.ok(service.updateMeterReading(meterReadingDTO));
@@ -125,8 +222,24 @@ public class MeterController {
      * not exist.
      * @return {@link ResponseEntity<MeterReadingDTO>}
      */
+    @Operation(summary = "Delete meter reading", description = "Delete meter reading by id from database")
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Delete meter reading by id",
+                    content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE)}),
+            @ApiResponse(responseCode = "400",
+                    description = "Meter reading id not valid or meter reading does not exist",
+                    content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = ApiExceptionResponse.class))}),
+            @ApiResponse(responseCode = "500", description = "Service error",
+                    content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = ApiExceptionResponse.class))})
+    })
     @DeleteMapping("/reading/{id}")
-    public ResponseEntity deleteMeterReadingById(@PathVariable Long id) {
+    public ResponseEntity deleteMeterReadingById(
+            @PathVariable
+            @Parameter(description = "Meter reading id", example = "1") Long id) {
         service.deleteMeterReadingById(id);
         return ResponseEntity.ok(null);
     }

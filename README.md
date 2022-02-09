@@ -78,6 +78,11 @@ Running commands creates image and starts the container at port 8080:
 - `docker run --name meter-readings -p 8080:8080 meter-readings` - runs docker container with name 
 meter-readings on port 8080.
 
+## OpenAPI
+
+OpenAPI with swagger UI is available after starting the service.\
+Links to docs are http://localhost:8080/swagger-ui/index.html or http://localhost:8080/swagger-ui-meterreadings.html. 
+
 ## TODO
 
 - [x] Parametrize integration tests
