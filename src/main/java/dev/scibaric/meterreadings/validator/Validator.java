@@ -1,6 +1,7 @@
 package dev.scibaric.meterreadings.validator;
 
 import dev.scibaric.meterreadings.dto.MeterReadingDTO;
+import dev.scibaric.meterreadings.repository.MeterReadingRepository;
 import dev.scibaric.meterreadings.repository.MeterRepository;
 import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
@@ -16,8 +17,11 @@ public class Validator {
 
     private final MeterRepository meterRepository;
 
-    public Validator(MeterRepository meterRepository) {
+    private final MeterReadingRepository meterReadingRepository;
+
+    public Validator(MeterRepository meterRepository, MeterReadingRepository meterReadingRepository) {
         this.meterRepository = meterRepository;
+        this.meterReadingRepository = meterReadingRepository;
     }
 
     /**
@@ -62,7 +66,7 @@ public class Validator {
      * Validates consumed energy, if conditions are not met {@link IllegalArgumentException} is raised.
      * Consumed energy must not be null and must be greater than or equal zero.
      *
-     * @param month Month
+     * @param energyConsumed Energy consumed
      * @throws IllegalArgumentException
      */
     public void validateEnergyConsumed(Integer energyConsumed) {
@@ -84,5 +88,19 @@ public class Validator {
         validateYear(meterReadingDTO.getYear());
         validateMonth(meterReadingDTO.getMonth());
         validateEnergyConsumed(meterReadingDTO.getEnergyConsumed());
+    }
+
+    /**
+     * Validates meter reading id, if conditions are not met {@link IllegalArgumentException} is raised.
+     * Meter reading id must not be null, must greater than zero and should exist in database.
+     *
+     * @param meterReadingId Meter reading id
+     * @throws IllegalArgumentException
+     */
+    public void validateMeterReadingId(Long meterReadingId) {
+        Assert.notNull(meterReadingId, "Meter reading id must not be null");
+        Assert.isTrue(meterReadingId > 0, "Meter reading id must be greater than 0");
+        Assert.isTrue(meterReadingRepository.existsById(meterReadingId),
+                String.format("Meter reading with id %d does not exist", meterReadingId));
     }
 }

@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.Month;
@@ -20,18 +21,18 @@ import java.time.format.TextStyle;
 import java.util.Locale;
 import java.util.stream.Stream;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest
 @AutoConfigureMockMvc
+@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 class MeterControllerIntegrationTest {
 
     @Autowired
     private MockMvc mockMvc;
 
-    @Test
+    @Test()
     void aggregateConsumptionByMeterIdAndYear_whenReadingExists_thenReturnResult() throws Exception {
         mockMvc.perform(get("/api/meter/1/consumption/aggregation/year/2020"))
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -169,7 +170,7 @@ class MeterControllerIntegrationTest {
     }
 
     @ParameterizedTest
-    @MethodSource("provideMeterReadingDTOsAndMessages")
+    @MethodSource("provideMeterReadingDTOsAndMessagesForSaving")
     void saveMeterReading_shouldReturnExceptionMessage(MeterReadingDTO meterReadingDTO, String message) throws Exception {
         mockMvc.perform(post("/api/meter/reading")
                         .content(asJsonString(meterReadingDTO))
@@ -179,8 +180,61 @@ class MeterControllerIntegrationTest {
                 .andExpect(jsonPath("$.message").value(message));
     }
 
+    @Test
+    void updateMeterReading_whenMeterReadingDTOIsCompleted_thenReturnResult() throws Exception {
+        Long id = 1L;
+        Integer year = 2020;
+        Integer month = 1;
+        Integer energyConsumed = 20;
+        mockMvc.perform(put("/api/meter/reading")
+                        .content(asJsonString(new MeterReadingDTO(year, month, energyConsumed, id)))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.year").value(year))
+                .andExpect(jsonPath("$.month").value(month))
+                .andExpect(jsonPath("$.energyConsumed").value(energyConsumed))
+                .andExpect(jsonPath("$.meterId").value(id));
+    }
+
+    @ParameterizedTest
+    @MethodSource("provideMeterReadingDTOsAndMessagesForUpdating")
+    void updateMeterReading_shouldReturnExceptionMessage(MeterReadingDTO meterReadingDTO, String message) throws Exception {
+        mockMvc.perform(put("/api/meter/reading")
+                        .content(asJsonString(meterReadingDTO))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value(message));
+    }
+
+    private static Stream<Arguments> provideMeterReadingDTOsAndMessagesForSaving() {
+        Long meterId = 1L;
+        Integer year = 2020;
+        Integer month = 2;
+        Integer energyConsumed = 15;
+        String m = Month.of(2).getDisplayName(TextStyle.FULL, Locale.ENGLISH);
+        Stream<Arguments> arguments = Stream.concat(provideMeterReadingDTOsAndMessages(),
+                Stream.of(Arguments.of(new MeterReadingDTO(year, month, energyConsumed, meterId),
+                String.format("Meter reading for meter id %d, year %d and month %s already exists", meterId, year, m))));
+
+        return arguments;
+    }
+
+    private static Stream<Arguments> provideMeterReadingDTOsAndMessagesForUpdating() {
+        Long meterId = 1L;
+        Integer year = 2021;
+        Integer month = 2;
+        Integer energyConsumed = 15;
+        String m = Month.of(month).getDisplayName(TextStyle.FULL, Locale.ENGLISH);
+        Stream<Arguments> arguments = Stream.concat(provideMeterReadingDTOsAndMessages(),
+                Stream.of(Arguments.of(new MeterReadingDTO(year, month, energyConsumed, meterId),
+                        String.format("Meter reading for meter id %d, year %d and month %s does not exist", meterId, year, m))));
+
+        return arguments;
+    }
+
     private static Stream<Arguments> provideMeterReadingDTOsAndMessages() {
-        String month = Month.of(2).getDisplayName(TextStyle.FULL, Locale.ENGLISH);
         return Stream.of(
                 Arguments.of(new MeterReadingDTO(2021, 1, 15, null), "Meter id must not be null"),
                 Arguments.of(new MeterReadingDTO(2021, 1, 15, 0L), "Meter id must be greater than 0"),
@@ -191,9 +245,26 @@ class MeterControllerIntegrationTest {
                 Arguments.of(new MeterReadingDTO(2021, null, 15, 1L), "Month must not be null"),
                 Arguments.of(new MeterReadingDTO(2021, 0, 15, 1L), "Month must be between 1 and 12"),
                 Arguments.of(new MeterReadingDTO(2021, 13, 15, 1L), "Month must be between 1 and 12"),
-                Arguments.of(new MeterReadingDTO(2020, 2, 15, 1L),
-                        String.format("Meter reading for meter id %d, year %d and month %s already exists", 1L, 2020, month))
+                Arguments.of(new MeterReadingDTO(2021, 1, null, 1L), "Energy consumed must not be null"),
+                Arguments.of(new MeterReadingDTO(2021, 1, -1, 1L), "Energy consumed must greater or equals 0")
         );
+    }
+
+    @Test
+    void deleteMeterReadingById_deletedSuccessfully() throws Exception {
+        mockMvc.perform(delete("/api/meter/reading/1"))
+                .andExpect(status().isOk());
+    }
+
+    @ParameterizedTest
+    @CsvSource(value = {
+            "0, Meter reading id must be greater than 0",
+            "100, Meter reading with id 100 does not exist"
+    }, nullValues = {"null"})
+    void deleteMeterReadingById_shouldThrowException(Long meterReadingId, String message) throws Exception {
+        mockMvc.perform(delete("/api/meter/reading/{id}", meterReadingId))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value(message));
     }
 
     public static String asJsonString(final Object obj) {

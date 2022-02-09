@@ -64,4 +64,27 @@ public interface MeterService {
      * @return {@link MeterReadingDTO}
      */
     MeterReadingDTO saveMeterReading(MeterReadingDTO meterReadingDTO);
+
+    /**
+     * Method accepts parameter <b>meterReadingDTO</b>. Parameter is then validated and if there is meter reading for
+     * meter with id, year and month object is mapped to {@link dev.scibaric.meterreadings.model.MeterReading}.
+     * {@link dev.scibaric.meterreadings.model.MeterReading} is propagated to the database if everything is alright.
+     * {@link MeterReadingDTO} is returned. Method can throw {@link IllegalArgumentException} if parameter is not valid.
+     *
+     * @param meterReadingDTO Meter reading DTO
+     * @throws IllegalArgumentException If parameters do not satisfy requirements and if meter reading for meter id
+     * year and month does not exist.
+     * @return {@link MeterReadingDTO}
+     */
+    MeterReadingDTO updateMeterReading(MeterReadingDTO meterReadingDTO);
+
+
+    /**
+     * Method accepts parameter <b>meterReadingId</b> and deletes meter reading from database if all
+     * conditions are met. Method can throw {@link IllegalArgumentException} if parameter is not valid or
+     * meter reading does not exist in database.
+     *
+     * @throws IllegalArgumentException If parameters do not satisfy requirements.
+     */
+    void deleteMeterReadingById(Long meterReadingId);
 }

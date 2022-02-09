@@ -95,4 +95,39 @@ public class MeterController {
         return ResponseEntity.created(null).body(service.saveMeterReading(meterReadingDTO));
     }
 
+    /**
+     * Method accepts parameter <b>meterReadingDTO</b> as JSON object. Object is then validated and if there is
+     * meter reading for meter with id, year and month object is mapped to
+     * {@link dev.scibaric.meterreadings.model.MeterReading}. {@link dev.scibaric.meterreadings.model.MeterReading} is
+     * propagated to the database if everything is alright. {@link MeterReadingDTO} is returned and wrapped in
+     * {@link ResponseEntity}. If meter reading is saved to database, service returns http status 201 CREATED.
+     * Method can throw {@link IllegalArgumentException} if JSON object is not valid. Handling exceptions is left to
+     * {@link ExceptionHandlerController}.
+     *
+     * @param meterReadingDTO JSON object for saving meter readings
+     * @throws IllegalArgumentException If parameters do not satisfy requirements and if meter reading for meter id
+     * year and month does not exist.
+     * @return {@link ResponseEntity<MeterReadingDTO>}
+     */
+    @PutMapping("/reading")
+    public ResponseEntity<MeterReadingDTO> updateMeterReading(@RequestBody MeterReadingDTO meterReadingDTO) {
+        return ResponseEntity.ok(service.updateMeterReading(meterReadingDTO));
+    }
+
+    /**
+     * Method accepts parameter <b>id</b> as path variable. Method tries to delete meter reading with
+     * provided id. If meter reading has been deleted from database, service returns http status 200 OK.
+     * Method can throw {@link IllegalArgumentException} if id is not valid or meter reading with id does
+     * not exist in database. Handling exceptions is left to {@link ExceptionHandlerController}.
+     *
+     * @param id Meter reading id
+     * @throws IllegalArgumentException If parameter does not satisfy requirements and if meter reading id does
+     * not exist.
+     * @return {@link ResponseEntity<MeterReadingDTO>}
+     */
+    @DeleteMapping("/reading/{id}")
+    public ResponseEntity deleteMeterReadingById(@PathVariable Long id) {
+        service.deleteMeterReadingById(id);
+        return ResponseEntity.ok(null);
+    }
 }

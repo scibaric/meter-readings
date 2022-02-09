@@ -3,6 +3,8 @@ package dev.scibaric.meterreadings.repository;
 import dev.scibaric.meterreadings.model.Meter;
 import dev.scibaric.meterreadings.model.MeterReading;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 
@@ -84,6 +86,21 @@ class MeterRepositoryUnitTest {
     }
 
     @Test
+    void update_updateSuccessfully() {
+        MeterReading meterReading = meterReadingRepository.findMeterReadingByMeterIdAndYearAndMonth(1L, 2020, 1);
+
+        MeterReading updatedMeterReading = meterReadingRepository.save(new MeterReading(new Meter(1L), 2020, 1, 27));
+
+        assertThat(updatedMeterReading)
+                .isNotNull()
+                .isNotEqualTo(meterReading);
+        assertThat(updatedMeterReading.getMeter().getId()).isEqualTo(meterReading.getMeter().getId());
+        assertThat(updatedMeterReading.getYear()).isEqualTo(meterReading.getYear());
+        assertThat(updatedMeterReading.getMonth()).isEqualTo(meterReading.getMonth());
+        assertThat(updatedMeterReading.getEnergyConsumed()).isNotEqualTo(meterReading.getEnergyConsumed());
+    }
+
+    @Test
     void delete_deleteSuccessfully() {
         Long id = 1l;
         meterReadingRepository.deleteById(id);
@@ -93,4 +110,12 @@ class MeterRepositoryUnitTest {
         assertThat(result).isEmpty();
     }
 
+    @ParameterizedTest
+    @CsvSource({
+            "1, true",
+            "100, false"
+    })
+    void existsById_ifMeterReadingExistsById_theReturnTrue(Long meterReadingId, Boolean exists) {
+        assertThat(meterReadingRepository.existsById(meterReadingId)).isEqualTo(exists);
+    }
 }

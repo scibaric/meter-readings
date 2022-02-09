@@ -7,6 +7,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
@@ -20,8 +21,8 @@ import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.never;
 
 @ExtendWith(SpringExtension.class)
 class MeterControllerUnitTest {
@@ -652,8 +653,31 @@ class MeterControllerUnitTest {
 
         verify(service).findByMeterIdAndYearAndMonth(id, year, month);
     }
-    
-    // *****************************
+
+    @Test
+    void saveMeterReading_whenMeterReadingDTOIsCompleted_thenThrowException() {
+        // given
+        Long id = 1L;
+        Integer year = 2020;
+        Integer month = 3;
+        Integer energyConsumed = 14;
+        MeterReadingDTO meterReadingDTO = new MeterReadingDTO();
+        meterReadingDTO.setMeterId(id);
+        meterReadingDTO.setYear(year);
+        meterReadingDTO.setMonth(month);
+        meterReadingDTO.setEnergyConsumed(energyConsumed);
+
+        // when
+        when(service.saveMeterReading(meterReadingDTO)).thenReturn(meterReadingDTO);
+        MeterReadingDTO result = service.saveMeterReading(meterReadingDTO);
+
+        // then
+        assertThat(result)
+                .isNotNull()
+                .isEqualTo(meterReadingDTO);
+
+        verify(service).saveMeterReading(meterReadingDTO);
+    }
 
     @Test
     void saveMeterReading_whenMeterReadingIsNull_thenThrowException() {
@@ -934,5 +958,343 @@ class MeterControllerUnitTest {
                 .hasMessage(message);
 
         verify(service).saveMeterReading(meterReadingDTO);
+    }
+
+    @Test
+    void updateMeterReading_whenMeterReadingDTOIsCompleted_thenThrowException() {
+        // given
+        Long id = 1L;
+        Integer year = 2020;
+        Integer month = 3;
+        Integer energyConsumed = 14;
+        MeterReadingDTO meterReadingDTO = new MeterReadingDTO();
+        meterReadingDTO.setMeterId(id);
+        meterReadingDTO.setYear(year);
+        meterReadingDTO.setMonth(month);
+        meterReadingDTO.setEnergyConsumed(energyConsumed);
+
+        // when
+        when(service.updateMeterReading(meterReadingDTO)).thenReturn(meterReadingDTO);
+        MeterReadingDTO result = service.updateMeterReading(meterReadingDTO);
+
+        // then
+        assertThat(result)
+                .isNotNull()
+                .isEqualTo(meterReadingDTO);
+
+        verify(service).updateMeterReading(meterReadingDTO);
+    }
+
+    @Test
+    void updateMeterReading_whenMeterReadingIsNull_thenThrowException() {
+        // given
+        String message = "Meter reading must not be null";
+        MeterReadingDTO meterReadingDTO = null;
+
+        // when
+        when(service.updateMeterReading(meterReadingDTO)).thenThrow(new IllegalArgumentException(message));
+
+        // then
+        assertThatThrownBy(() -> controller.updateMeterReading(meterReadingDTO))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage(message);
+
+        verify(service).updateMeterReading(meterReadingDTO);
+    }
+
+    @Test
+    void updateMeterReading_whenMeterIdIsNull_thenThrowException() {
+        // given
+        Long id = null;
+        String message = "Meter id must not be null";
+        MeterReadingDTO meterReadingDTO = new MeterReadingDTO();
+        meterReadingDTO.setMeterId(id);
+
+        // when
+        when(service.updateMeterReading(meterReadingDTO)).thenThrow(new IllegalArgumentException(message));
+
+        // then
+        assertThatThrownBy(() -> controller.updateMeterReading(meterReadingDTO))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage(message);
+
+        verify(service).updateMeterReading(meterReadingDTO);
+    }
+
+    @Test
+    void updateMeterReading_whenMeterIdIsZero_thenThrowException() {
+        // given
+        Long id = 0L;
+        String message = "Meter id must be greater than zero";
+        MeterReadingDTO meterReadingDTO = new MeterReadingDTO();
+        meterReadingDTO.setMeterId(id);
+
+        // when
+        when(service.updateMeterReading(meterReadingDTO)).thenThrow(new IllegalArgumentException(message));
+
+        // then
+        assertThatThrownBy(() -> controller.updateMeterReading(meterReadingDTO))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage(message);
+
+        verify(service).updateMeterReading(meterReadingDTO);
+    }
+
+    @Test
+    void updateMeterReading_whenMeterIdDoesNotExist_thenThrowException() {
+        // given
+        Long id = 5L;
+        String message = String.format("Meter with id %d does not exist", id);
+        MeterReadingDTO meterReadingDTO = new MeterReadingDTO();
+        meterReadingDTO.setMeterId(id);
+
+        // when
+        when(service.updateMeterReading(meterReadingDTO)).thenThrow(new IllegalArgumentException(message));
+
+        // then
+        assertThatThrownBy(() -> controller.updateMeterReading(meterReadingDTO))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage(message);
+
+        verify(service).updateMeterReading(meterReadingDTO);
+    }
+
+    @Test
+    void updateMeterReading_whenYearIsNull_thenThrowException() {
+        // given
+        Long id = 1L;
+        Integer year = null;
+        String message = "Year must not be null";
+        MeterReadingDTO meterReadingDTO = new MeterReadingDTO();
+        meterReadingDTO.setMeterId(id);
+        meterReadingDTO.setYear(year);
+
+        // when
+        when(service.updateMeterReading(meterReadingDTO)).thenThrow(new IllegalArgumentException(message));
+
+        // then
+        assertThatThrownBy(() -> controller.updateMeterReading(meterReadingDTO))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage(message);
+
+        verify(service).updateMeterReading(meterReadingDTO);
+    }
+
+    @Test
+    void updateMeterReading_whenYearLessThanEqualZero_thenThrowException() {
+        // given
+        Long id = 1L;
+        Integer year = 0;
+        String message = "Year must be greater than or equal 0";
+        MeterReadingDTO meterReadingDTO = new MeterReadingDTO();
+        meterReadingDTO.setMeterId(id);
+        meterReadingDTO.setYear(year);
+
+        // when
+        when(service.updateMeterReading(meterReadingDTO)).thenThrow(new IllegalArgumentException(message));
+
+        // then
+        assertThatThrownBy(() -> controller.updateMeterReading(meterReadingDTO))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage(message);
+
+        verify(service).updateMeterReading(meterReadingDTO);
+    }
+
+    @Test
+    void updateMeterReading_whenYearIsInTheFuture_thenThrowException() {
+        // given
+        Long id = 1L;
+        Integer year = Year.now().getValue() + 1;
+        String message = "Year must not be in the future";
+        MeterReadingDTO meterReadingDTO = new MeterReadingDTO();
+        meterReadingDTO.setMeterId(id);
+        meterReadingDTO.setYear(year);
+
+        // when
+        when(service.updateMeterReading(meterReadingDTO)).thenThrow(new IllegalArgumentException(message));
+
+        // then
+        assertThatThrownBy(() -> controller.updateMeterReading(meterReadingDTO))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage(message);
+
+        verify(service).updateMeterReading(meterReadingDTO);
+    }
+
+    @Test
+    void updateMeterReading_whenMonthIsNull_thenThrowException() {
+        // given
+        Long id = 1L;
+        Integer year = Year.now().getValue();
+        Integer month = null;
+        String message = "Month must not be null";
+        MeterReadingDTO meterReadingDTO = new MeterReadingDTO();
+        meterReadingDTO.setMeterId(id);
+        meterReadingDTO.setYear(year);
+        meterReadingDTO.setMonth(month);
+
+        // when
+        when(service.updateMeterReading(meterReadingDTO)).thenThrow(new IllegalArgumentException(message));
+
+        // then
+        assertThatThrownBy(() -> controller.updateMeterReading(meterReadingDTO))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage(message);
+
+        verify(service).updateMeterReading(meterReadingDTO);
+    }
+
+    @Test
+    void updateMeterReading_whenMonthIsLessThan1_thenThrowException() {
+        // given
+        Long id = 1L;
+        Integer year = Year.now().getValue();
+        Integer month = 0;
+        String message = "Month must be between 1 and 12";
+        MeterReadingDTO meterReadingDTO = new MeterReadingDTO();
+        meterReadingDTO.setMeterId(id);
+        meterReadingDTO.setYear(year);
+        meterReadingDTO.setMonth(month);
+
+        // when
+        when(service.updateMeterReading(meterReadingDTO)).thenThrow(new IllegalArgumentException(message));
+
+        // then
+        assertThatThrownBy(() -> controller.updateMeterReading(meterReadingDTO))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage(message);
+
+        verify(service).updateMeterReading(meterReadingDTO);
+    }
+
+    @Test
+    void updateMeterReading_whenMonthIsGreaterThan12_thenThrowException() {
+        // given
+        Long id = 1L;
+        Integer year = Year.now().getValue();
+        Integer month = 0;
+        String message = "Month must be between 1 and 12";
+        MeterReadingDTO meterReadingDTO = new MeterReadingDTO();
+        meterReadingDTO.setMeterId(id);
+        meterReadingDTO.setYear(year);
+        meterReadingDTO.setMonth(month);
+
+        // when
+        when(service.updateMeterReading(meterReadingDTO)).thenThrow(new IllegalArgumentException(message));
+
+        // then
+        assertThatThrownBy(() -> controller.updateMeterReading(meterReadingDTO))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage(message);
+
+        verify(service).updateMeterReading(meterReadingDTO);
+    }
+
+    @Test
+    void updateMeterReading_whenEnergyConsumedIsNull_thenThrowException() {
+        // given
+        Long id = 1L;
+        Integer year = Year.now().getValue();
+        Integer month = 4;
+        Integer energyConsumed = null;
+        String message = "Energy consumed must not be null";
+        MeterReadingDTO meterReadingDTO = new MeterReadingDTO();
+        meterReadingDTO.setMeterId(id);
+        meterReadingDTO.setYear(year);
+        meterReadingDTO.setMonth(month);
+        meterReadingDTO.setEnergyConsumed(energyConsumed);
+
+        // when
+        when(service.updateMeterReading(meterReadingDTO)).thenThrow(new IllegalArgumentException(message));
+
+        // then
+        assertThatThrownBy(() -> controller.updateMeterReading(meterReadingDTO))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage(message);
+
+        verify(service).updateMeterReading(meterReadingDTO);
+    }
+
+    @Test
+    void updateMeterReading_whenEnergyConsumedIsLessThanZero_thenThrowException() {
+        // given
+        Long id = 1L;
+        Integer year = Year.now().getValue();
+        Integer month = 4;
+        Integer energyConsumed = -1;
+        String message = "Energy consumed must greater or equals 0";
+        MeterReadingDTO meterReadingDTO = new MeterReadingDTO();
+        meterReadingDTO.setMeterId(id);
+        meterReadingDTO.setYear(year);
+        meterReadingDTO.setMonth(month);
+        meterReadingDTO.setEnergyConsumed(energyConsumed);
+
+        // when
+        when(service.updateMeterReading(meterReadingDTO)).thenThrow(new IllegalArgumentException(message));
+
+        // then
+        assertThatThrownBy(() -> controller.updateMeterReading(meterReadingDTO))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage(message);
+
+        verify(service).updateMeterReading(meterReadingDTO);
+    }
+
+    @Test
+    void updateMeterReading_whenMeterReadingForSpecificDoesNotExist_thenThrowException() {
+        // given
+        Long id = 1L;
+        Integer year = 2020;
+        Integer month = 3;
+        Integer energyConsumed = 14;
+        String m = Month.of(month).getDisplayName(TextStyle.FULL, Locale.ENGLISH);
+        String message = String.format("Meter reading for meter id %d, year %d and month %s does not exist", id, year, m);
+        MeterReadingDTO meterReadingDTO = new MeterReadingDTO();
+        meterReadingDTO.setMeterId(id);
+        meterReadingDTO.setYear(year);
+        meterReadingDTO.setEnergyConsumed(energyConsumed);
+
+        // when
+        when(service.updateMeterReading(meterReadingDTO)).thenThrow(new IllegalArgumentException(message));
+
+        // then
+        assertThatThrownBy(() -> controller.updateMeterReading(meterReadingDTO))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage(message);
+
+        verify(service).updateMeterReading(meterReadingDTO);
+    }
+
+    @Test
+    void deleteMeterReadingById_deletedSuccessfully() {
+        // given
+        Long meterReadingId = 1L;
+
+        // when
+        doNothing().when(service).deleteMeterReadingById(meterReadingId);
+
+        controller.deleteMeterReadingById(meterReadingId);
+
+        // then
+        verify(service).deleteMeterReadingById(meterReadingId);
+    }
+
+    @ParameterizedTest
+    @CsvSource(value = {
+            "null, Meter reading id must not be null",
+            "0, Meter reading id must be greater than 0",
+            "100, Meter reading with id 100 does not exist"
+    }, nullValues = {"null"})
+    void deleteMeterReadingById_shouldThrowException(Long meterReadingId, String message) {
+        // when
+        doThrow(new IllegalArgumentException(message)).when(service).deleteMeterReadingById(meterReadingId);
+
+        // then
+        assertThatThrownBy(() -> controller.deleteMeterReadingById(meterReadingId))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage(message);
+
+        verify(service).deleteMeterReadingById(meterReadingId);
     }
 }

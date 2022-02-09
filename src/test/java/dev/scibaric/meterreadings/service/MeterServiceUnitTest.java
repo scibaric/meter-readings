@@ -11,6 +11,8 @@ import dev.scibaric.meterreadings.validator.Validator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
@@ -685,4 +687,103 @@ class MeterServiceUnitTest {
         verify(meterReadingRepository, never()).save(meterReading);
     }
 
+    @Test
+    void updateMeterReading_whenMeterReadingIsCompleted_thenReturnResult() {
+        // given
+        Long id = 1L;
+        Integer year = 2020;
+        Integer month = 4;
+        Integer energyConsumed = 20;
+        MeterReadingDTO meterReadingDTO = new MeterReadingDTO();
+        meterReadingDTO.setMeterId(id);
+        meterReadingDTO.setYear(year);
+        meterReadingDTO.setMonth(month);
+        meterReadingDTO.setEnergyConsumed(energyConsumed);
+        String m = Month.of(month).getDisplayName(TextStyle.FULL, Locale.ENGLISH);
+
+        MeterReading meterReading = new MeterReading(new Meter(meterReadingDTO.getMeterId()),
+                meterReadingDTO.getYear(), meterReadingDTO.getMonth(), 15);
+
+        // when
+        when(meterReadingRepository.findMeterReadingByMeterIdAndYearAndMonth(meterReadingDTO.getMeterId(),
+                meterReadingDTO.getYear(), meterReadingDTO.getMonth())).thenReturn(meterReading);
+
+        meterReading.setEnergyConsumed(energyConsumed); // updating energy consumption
+        when(meterReadingRepository.save(meterReading)).thenReturn(meterReading);
+
+        MeterReadingDTO result = service.updateMeterReading(meterReadingDTO);
+
+        // then
+        assertThat(result.getMeterId()).isEqualTo(meterReading.getMeter().getId());
+        assertThat(result.getYear()).isEqualTo(meterReading.getYear());
+        assertThat(result.getMonth()).isEqualTo(meterReading.getMonth());
+        assertThat(result.getEnergyConsumed()).isEqualTo(meterReading.getEnergyConsumed());
+
+        verify(meterReadingRepository).findMeterReadingByMeterIdAndYearAndMonth(id, year, month);
+        verify(meterReadingRepository).save(meterReading);
+    }
+
+    @Test
+    void updateMeterReading_whenMeterReadingForSpecificMonthExist_thenThrowException() {
+        // given
+        Long id = 1L;
+        Integer year = 2021;
+        Integer month = 4;
+        MeterReadingDTO meterReadingDTO = new MeterReadingDTO();
+        meterReadingDTO.setMeterId(id);
+        meterReadingDTO.setYear(year);
+        meterReadingDTO.setMonth(month);
+        meterReadingDTO.setEnergyConsumed(20);
+        String m = Month.of(month).getDisplayName(TextStyle.FULL, Locale.ENGLISH);
+
+        MeterReading meterReading = new MeterReading(new Meter(meterReadingDTO.getMeterId()),
+                meterReadingDTO.getYear(), meterReadingDTO.getMonth(), meterReadingDTO.getEnergyConsumed());
+
+        // when
+        when(meterReadingRepository.findMeterReadingByMeterIdAndYearAndMonth(meterReadingDTO.getMeterId(),
+                meterReadingDTO.getYear(), meterReadingDTO.getMonth())).thenReturn(null);
+
+        // then
+        assertThatThrownBy(() -> service.updateMeterReading(meterReadingDTO))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage(String.format("Meter reading for meter id %d, year %d and month %s does not exist", id, year, m));
+
+        verify(meterReadingRepository).findMeterReadingByMeterIdAndYearAndMonth(id, year, month);
+        verify(meterReadingRepository, never()).save(meterReading);
+    }
+
+    @Test
+    void deleteMeterReadingById_deletedSuccessfully() {
+        // given
+        Long meterReadingId = 1L;
+
+        // when
+        doNothing().when(validator).validateMeterReadingId(meterReadingId);
+        doNothing().when(meterReadingRepository).deleteById(meterReadingId);
+
+        service.deleteMeterReadingById(meterReadingId);
+
+        // then
+        verify(validator).validateMeterReadingId(meterReadingId);
+        verify(meterReadingRepository).deleteById(meterReadingId);
+    }
+
+    @ParameterizedTest
+    @CsvSource(value = {
+            "null, Meter reading id must not be null",
+            "0, Meter reading id must be greater than 0",
+            "100, Meter reading with id 100 does not exist"
+    }, nullValues = {"null"})
+    void deleteMeterReadingById_shouldThrowException(Long meterReadingId, String message) {
+        // when
+        doThrow(new IllegalArgumentException(message)).when(validator).validateMeterReadingId(meterReadingId);
+
+        // then
+        assertThatThrownBy(() -> service.deleteMeterReadingById(meterReadingId))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage(message);
+
+        verify(validator).validateMeterReadingId(meterReadingId);
+        verify(meterReadingRepository, never()).deleteById(meterReadingId);
+    }
 }

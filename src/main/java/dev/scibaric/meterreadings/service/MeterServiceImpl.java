@@ -105,6 +105,33 @@ public class MeterServiceImpl implements MeterService {
         return meterReadingDTO;
     }
 
+    @Override
+    public MeterReadingDTO updateMeterReading(MeterReadingDTO meterReadingDTO) {
+        validator.validateMeterReadingDTO(meterReadingDTO);
+        String m = Month.of(meterReadingDTO.getMonth()).getDisplayName(TextStyle.FULL, Locale.ENGLISH);
+
+        MeterReading meterReading = meterReadingRepository.findMeterReadingByMeterIdAndYearAndMonth(
+                meterReadingDTO.getMeterId(), meterReadingDTO.getYear(), meterReadingDTO.getMonth()
+        );
+
+        if (isNull(meterReading))
+            throw new IllegalArgumentException(
+                    String.format("Meter reading for meter id %d, year %d and month %s does not exist",
+                            meterReadingDTO.getMeterId(), meterReadingDTO.getYear(), m));
+
+        meterReading.setEnergyConsumed(meterReadingDTO.getEnergyConsumed());
+        meterReadingRepository.save(meterReading);
+
+        return meterReadingDTO;
+    }
+
+    @Override
+    public void deleteMeterReadingById(Long meterReadingId) {
+        validator.validateMeterReadingId(meterReadingId);
+
+        meterReadingRepository.deleteById(meterReadingId);
+    }
+
     private MeterReadingDTO meterReadingToMeterReadingDTO(MeterReading meterReading) {
         String m = Month.of(meterReading.getMonth()).getDisplayName(TextStyle.FULL, Locale.ENGLISH);
 

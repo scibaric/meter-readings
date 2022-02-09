@@ -1,6 +1,7 @@
 package dev.scibaric.meterreadings.validator;
 
 import dev.scibaric.meterreadings.dto.MeterReadingDTO;
+import dev.scibaric.meterreadings.repository.MeterReadingRepository;
 import dev.scibaric.meterreadings.repository.MeterRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -22,11 +23,14 @@ class ValidatorUnitTest {
     @MockBean
     private MeterRepository meterRepository;
 
+    @MockBean
+    private MeterReadingRepository meterReadingRepository;
+
     private Validator validator;
 
     @BeforeEach
     void setUp() {
-        validator = new Validator(meterRepository);
+        validator = new Validator(meterRepository, meterReadingRepository);
     }
 
     @Test
@@ -58,8 +62,16 @@ class ValidatorUnitTest {
 
     @Test
     void validateMeterId_whenMeterWithIdDoesNotExist_thenThrowException() {
+        // when
         Long id = 5L;
         String message = String.format("Meter with id %d does not exist", id);
+
+        // when
+        when(meterRepository.existsById(id)).thenReturn(false);
+
+        doThrow(IllegalArgumentException.class).when(mockValidator).validateMeterReadingId(id);
+
+        // then
         assertThatThrownBy(() -> validator.validateMeterId(id))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage(message);
@@ -385,5 +397,49 @@ class ValidatorUnitTest {
                 .hasMessage("Energy consumed must greater or equals 0");
 
         verify(meterRepository).existsById(id);
+    }
+
+    @Test
+    void validateMeterReadingId_ifMeterReadingIdIs5_ItsOK() {
+        // given
+        Long meterReadingId = 5L;
+
+        // when
+        doNothing().when(mockValidator).validateMeterReadingId(meterReadingId);
+        mockValidator.validateMeterReadingId(meterReadingId);
+
+        // then
+        verify(mockValidator).validateMeterReadingId(meterReadingId);
+    }
+
+    @Test
+    void validateMeterReadingId_ifMeterReadingIdIsNull_thenThrowException() {
+        assertThatThrownBy(() -> validator.validateMeterReadingId(null))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("Meter reading id must not be null");
+    }
+
+    @Test
+    void validateMeterReadingId_ifMeterReadingIsLessThan0_thenThrowException() {
+        assertThatThrownBy(() -> validator.validateMeterReadingId(0L))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("Meter reading id must be greater than 0");
+    }
+
+    @Test
+    void validateMeterReadingId_ifMeterReadingDoesNotExist_thenThrowException() {
+        // given
+        Long meterReadingId = 15L;
+        String message = String.format("Meter reading with id %d does not exist", meterReadingId);
+
+        // when
+        when(meterReadingRepository.existsById(meterReadingId)).thenReturn(false);
+
+        doThrow(new IllegalArgumentException(message)).when(mockValidator).validateMeterReadingId(meterReadingId);
+
+        // then
+        assertThatThrownBy(() -> validator.validateMeterReadingId(meterReadingId))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage(message);
     }
 }
