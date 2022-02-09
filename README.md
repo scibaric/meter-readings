@@ -7,7 +7,7 @@ in-memory database. Service is started on port 8080.
 ## Test, build and run
 
 Maven automation tool is used for testing the service and building JAR.
-Testing and building is started with next command
+Testing and building is started with next command inside the project
 `./mvnw clean test package`. 
 
 All test should pass and JAR is generated in
@@ -67,3 +67,19 @@ JSON object, the same object is returned.
 }
 ```
 
+## Docker
+
+Application can be started as Docker container. Dockerfile holds specification for creating the
+image. To be able to create docker image, previously command `./mvnw clean test package` has to be run
+inside the project.
+
+Running commands creates image and starts the container at port 8080: 
+- `docker build -t meter-readings -f Dockerfile .` - creates docker image with tag meter-readings
+- `docker run --name meter-readings -p 8080:8080 meter-readings` - runs docker container with name 
+meter-readings on port 8080.
+
+## TODO
+
+- [x] Parametrize integration tests
+- [ ] Parametrize unit tests
+- [ ] Create proper mapper for before/after save/update meter reading
