@@ -34,7 +34,7 @@ class MeterControllerIntegrationTest {
 
     @Test()
     void aggregateConsumptionByMeterIdAndYear_whenReadingExists_thenReturnResult() throws Exception {
-        mockMvc.perform(get("/api/meter/1/consumption/aggregation/year/2023"))
+        mockMvc.perform(get("/api/meter/1/consumption/aggregation/year/2024"))
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.year").value(2020))
