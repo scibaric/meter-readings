@@ -2,7 +2,7 @@ name: Deploy to kubernetes
 
 on:
   workflow_run:
-    workflows: [ "Maven test and build"]
+    workflows: [ "Docker build and push"]
     branches:
       - 'k8s'
     types:

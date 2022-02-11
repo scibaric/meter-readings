@@ -2,7 +2,7 @@ name: Docker build and push
 
 on:
   workflow_run:
-    workflows: [ "Docker build and push"]
+    workflows: [ "Maven test and build"]
     branches:
       - 'k8s'
     types:
