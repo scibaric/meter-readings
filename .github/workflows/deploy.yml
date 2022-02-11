@@ -2,7 +2,8 @@ name: Deploy to kubernetes
 
 on:
   workflow_run:
-    workflows: [ "Docker build and push"]
+    workflows:
+      - 'Docker build and push'
     branches:
       - 'k8s'
     types:
