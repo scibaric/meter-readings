@@ -1,9 +1,12 @@
 name: Docker build and push
 
 on:
-  push:
+  workflow_run:
+    workflows: [ "Docker build and push"]
     branches:
       - 'k8s'
+    types:
+      - completed
 
 jobs:
   docker:
