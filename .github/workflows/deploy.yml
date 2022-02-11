@@ -20,7 +20,6 @@ jobs:
         run: mvn --batch-mode --update-snapshots verify
 
       - name: Temporarily save jar artifact
-        run: pwd
         uses: actions/upload-artifact@v2
         with:
           name: jar-artifact
@@ -44,14 +43,14 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Download artifact
+      - name: Linux command
         run: pwd
+      - name: Download artifact
         uses: actions/download-artifact@v2
         with:
           name: jar-artifact
           path: target/
       - name: Build and push
-        run: pwd
         uses: docker/build-push-action@v2
         with:
           platforms: linux/amd64,linux/arm64
