@@ -6,8 +6,10 @@ on:
       - 'k8s'
 
 jobs:
-  build:
+  deploy:
     runs-on: ubuntu-latest
+    needs: docker
+
     steps:
       - uses: actions/checkout@master
       - uses: azure/setup-kubectl@v2.0
