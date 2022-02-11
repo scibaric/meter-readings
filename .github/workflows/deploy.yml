@@ -1,0 +1,25 @@
+name: Deploy to kubernetes
+
+on:
+  push:
+    branches:
+      - 'k8s'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@master
+      - uses: azure/setup-kubectl@v2.0
+      - uses: Azure/k8s-set-context@v2
+        with:
+          kubeconfig: ${{ secrets.KUBE_CONFIG }}
+
+      - uses: Azure/k8s-deploy@v1.4
+        with:
+          namespace: meter-readings
+          action: deploy
+          manifests: |
+            manifests/deployment.yml
+            manifests/service.yml
+            manifests/ingress.yml

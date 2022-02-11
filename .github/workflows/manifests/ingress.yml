@@ -1,0 +1,24 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: meter-readings-ingress
+  namespace: meter-readings
+  annotations:
+    kubernetes.io/ingress.class: traefik
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+spec:
+  tls:
+    - secretName: meter-readings-scibaric-dev-tls
+      hosts:
+        - meter-readings.scibaric.dev
+  rules:
+  - host: meter-readings.scibaric.dev
+    http:
+      paths:
+        - path: /
+          pathType: Prefix
+          backend:
+            service:
+              name: meter-readings-service
+              port:
+                number: 80
