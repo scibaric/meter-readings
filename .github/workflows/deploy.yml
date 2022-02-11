@@ -71,6 +71,7 @@ jobs:
           namespace: meter-readings
           action: deploy
           manifests: |
+            namespace.yml
             deployment.yml
             service.yml
             ingress.yml
