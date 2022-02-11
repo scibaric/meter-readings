@@ -29,9 +29,6 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Linux command
-        run: pwd && ls
-
       - name: Build and push
         uses: docker/build-push-action@v2
         with:
@@ -51,12 +48,12 @@ jobs:
         with:
           kubeconfig: ${{ secrets.KUBE_CONFIG }}
 
-#      - uses: Azure/k8s-deploy@v1.4
-#        with:
-#          namespace: meter-readings
-#          action: deploy
-#          manifests: |
-#            namespace.yml
-#            deployment.yml
-#            service.yml
-#            ingress.yml
+      - uses: Azure/k8s-deploy@v1.4
+        with:
+          namespace: meter-readings
+          action: deploy
+          manifests: |
+            namespace.yml
+            deployment.yml
+            service.yml
+            ingress.yml
