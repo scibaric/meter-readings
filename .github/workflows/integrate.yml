@@ -23,5 +23,5 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: jar-artifact
-          path: ${{ github.workspace }}/meter-readings/target/*.jar
+          path: target/*.jar
           retention-days: 1
