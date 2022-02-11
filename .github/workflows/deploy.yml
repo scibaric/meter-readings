@@ -44,7 +44,7 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Linux command
-        run: pwd
+        run: ls target/
       - name: Download artifact
         uses: actions/download-artifact@v2
         with:
