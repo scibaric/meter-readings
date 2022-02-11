@@ -19,18 +19,6 @@ jobs:
       - name: Build with Maven
         run: mvn --batch-mode --update-snapshots verify
 
-      - name: Temporarily save jar artifact
-        uses: actions/upload-artifact@v2
-        with:
-          name: jar-artifact
-          path: target/*.jar
-          retention-days: 1
-
-  docker:
-    needs: build
-    runs-on: ubuntu-latest
-
-    steps:
       - name: Checkout
         uses: actions/checkout@v2
       - name: Set up QEMU
@@ -45,11 +33,7 @@ jobs:
 
       - name: Linux command
         run: ls target/
-      - name: Download artifact
-        uses: actions/download-artifact@v2
-        with:
-          name: jar-artifact
-          path: target/
+
       - name: Build and push
         uses: docker/build-push-action@v2
         with:
