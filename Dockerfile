@@ -1,4 +1,4 @@
 FROM openjdk:latest
-RUN pwd && ls
-COPY ./*.jar meterreadings.jar
+RUN cd /home/ && ls
+COPY target/*.jar meterreadings.jar
 ENTRYPOINT ["java","-jar","/meterreadings.jar"]
