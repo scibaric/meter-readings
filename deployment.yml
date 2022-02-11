@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: meter-readings-deployment
   namespace: meter-readings
-  labes:
+  labels:
     app: meter-readings
 spec:
   selector:
