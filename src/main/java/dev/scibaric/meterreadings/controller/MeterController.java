@@ -15,7 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/meters")
+@RequestMapping("/api/meter")
 public class MeterController {
 
     private final MeterService service;
