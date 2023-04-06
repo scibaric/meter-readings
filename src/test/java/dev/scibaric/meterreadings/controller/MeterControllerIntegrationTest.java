@@ -13,7 +13,11 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.transaction.annotation.Transactional;
+import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.time.Month;
 import java.time.Year;
@@ -24,15 +28,18 @@ import java.util.stream.Stream;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+@Transactional
+@Testcontainers
 @SpringBootTest
 @AutoConfigureMockMvc
-@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
+@ActiveProfiles("test")
+@Sql(scripts = "data-test.sql")
 class MeterControllerIntegrationTest {
 
     @Autowired
     private MockMvc mockMvc;
 
-    @Test()
+    @Test
     void aggregateConsumptionByMeterIdAndYear_whenReadingExists_thenReturnResult() throws Exception {
         mockMvc.perform(get("/api/meter/1/consumption/aggregation/year/2020"))
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
