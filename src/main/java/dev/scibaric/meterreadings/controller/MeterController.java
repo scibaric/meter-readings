@@ -243,4 +243,9 @@ public class MeterController {
         service.deleteMeterReadingById(id);
         return ResponseEntity.ok(null);
     }
+
+    @GetMapping("/reading/message")
+    public ResponseEntity getMessage() {
+        return ResponseEntity.ok("I'm returning a message");
+    }
 }
