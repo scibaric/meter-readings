@@ -246,6 +246,6 @@ public class MeterController {
 
     @GetMapping("/reading/message")
     public ResponseEntity getMessage() {
-        return ResponseEntity.ok("I'm returning a messages");
+        return ResponseEntity.ok("I'm returning a messages to the user");
     }
 }
