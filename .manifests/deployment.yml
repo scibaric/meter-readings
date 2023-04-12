@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: meter-readings-deployment
+  namespace: meter-readings
+  labels:
+    app: meter-readings
+spec:
+  selector:
+    matchLabels:
+      app: meter-readings
+  template:
+    metadata:
+      labels:
+        app: meter-readings
+    spec:
+      containers:
+        - name: meter-readings
+          image: sebcibaric/meter-readings:latest
+          ports:
+            - containerPort: 8080
