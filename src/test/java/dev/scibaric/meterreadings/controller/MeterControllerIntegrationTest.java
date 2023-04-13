@@ -118,7 +118,7 @@ public class MeterControllerIntegrationTest {
 
     @Test
     void aggregateConsumptionByMeterIdAndYear_whenReadingExists_thenReturnResult() throws Exception {
-        mockMvc.perform(get("/api/meter/1/consumption/aggregation/year/2020"))
+        mockMvc.perform(get("/api/v1/meters/1/consumption/aggregation/2020"))
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.year").value(2020))
@@ -127,8 +127,8 @@ public class MeterControllerIntegrationTest {
 
     @ParameterizedTest
     @CsvSource({
-            "1, 2021, /api/meter/{id}/consumption/aggregation/year/{year}",
-            "1, 2021, /api/meter/{id}/year/{year}",
+            "1, 2021, /api/v1/meters/{id}/consumption/aggregation/{year}",
+            "1, 2021, /api/v1/meters/{id}/{year}",
     })
     void aggregateConsumptionByMeterIdAndYear_whenReadingForYearDoesNotExist_thenReturnExceptionMessage(Long id, Integer year, String url) throws Exception {
         mockMvc.perform(get(url, id, year))
@@ -139,9 +139,9 @@ public class MeterControllerIntegrationTest {
 
     @ParameterizedTest
     @CsvSource({
-            "0, /api/meter/{id}/consumption/aggregation/year/2020",
-            "0, /api/meter/{id}/year/2020",
-            "0, /api/meter/{id}/year/2020/month/3"
+            "0, /api/v1/meters/{id}/consumption/aggregation/2020",
+            "0, /api/v1/meters/{id}/2020",
+            "0, /api/v1/meters/{id}/2020/3"
     })
     void ifMeterIdLessThanOne_thenReturnExceptionMessage(Long id, String url) throws Exception {
         mockMvc.perform(get(url, id))
@@ -152,9 +152,9 @@ public class MeterControllerIntegrationTest {
 
     @ParameterizedTest
     @CsvSource({
-            "10, /api/meter/{id}/consumption/aggregation/year/2020",
-            "11, /api/meter/{id}/year/2020",
-            "12, /api/meter/{id}/year/2020/month/3"
+            "10, /api/v1/meters/{id}/consumption/aggregation/2020",
+            "11, /api/v1/meters/{id}/2020",
+            "12, /api/v1/meters/{id}/2020/3"
     })
     void ifMeterIdDoesNotExist_thenReturnExceptionMessage(Long id, String url) throws Exception {
         mockMvc.perform(get(url, id))
@@ -165,9 +165,9 @@ public class MeterControllerIntegrationTest {
 
     @ParameterizedTest
     @CsvSource({
-            "-1, /api/meter/1/consumption/aggregation/year/{year}",
-            "-1, /api/meter/1/year/{year}",
-            "-1, /api/meter/1/year/{year}/month/3"
+            "-1, /api/v1/meters/1/consumption/aggregation/{year}",
+            "-1, /api/v1/meters/1/{year}",
+            "-1, /api/v1/meters/1/{year}/3"
     })
     void ifYearIsLessThan0_thenReturnExceptionMessage(Integer year, String url) throws Exception {
         mockMvc.perform(get(url, year))
@@ -188,15 +188,15 @@ public class MeterControllerIntegrationTest {
     private static Stream<Arguments> provideYearsInFutureAndURLs() {
         Integer yearInTheFuture = Year.now().getValue() + 1;
         return Stream.of(
-                Arguments.of(yearInTheFuture, "/api/meter/1/consumption/aggregation/year/{year}"),
-                Arguments.of(yearInTheFuture, "/api/meter/1/year/{year}"),
-                Arguments.of(yearInTheFuture, "/api/meter/1/year/{year}/month/3")
+                Arguments.of(yearInTheFuture, "/api/v1/meters/1/consumption/aggregation/{year}"),
+                Arguments.of(yearInTheFuture, "/api/v1/meters/1/{year}"),
+                Arguments.of(yearInTheFuture, "/api/v1/meters/1/{year}/3")
         );
     }
 
     @Test
     void findByMeterIdAndYear_whenReadingExists_thenReturnResult() throws Exception {
-        mockMvc.perform(get("/api/meter/1/year/2020"))
+        mockMvc.perform(get("/api/v1/meters/1/2020"))
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.year").value(2020))
@@ -206,7 +206,7 @@ public class MeterControllerIntegrationTest {
 
     @Test
     void findByMeterIdAndYearAndMonth_whenReadingExists_thenReturnResult() throws Exception {
-        mockMvc.perform(get("/api/meter/1/year/2020/month/1"))
+        mockMvc.perform(get("/api/v1/meters/1/2020/1"))
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.year").value(2020))
@@ -220,7 +220,7 @@ public class MeterControllerIntegrationTest {
         Integer year = 2021;
         int month = 12;
         String m = Month.of(month).getDisplayName(TextStyle.FULL, Locale.ENGLISH);
-        mockMvc.perform(get("/api/meter/{id}/year/{year}/month/{month}", id, year, month))
+        mockMvc.perform(get("/api/v1/meters/{id}/{year}/{month}", id, year, month))
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.message").value(
@@ -230,7 +230,7 @@ public class MeterControllerIntegrationTest {
     @ParameterizedTest
     @ValueSource(ints = {0, 13})
     void ifMonthIsLessThan1OrGreaterThan12_thenReturnExceptionMessage(Integer month) throws Exception {
-        mockMvc.perform(get("/api/meter/1/year/2020/month/{month}", month))
+        mockMvc.perform(get("/api/v1/meters/1/2020/{month}", month))
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message").value("Month must be between 1 and 12"));
@@ -242,7 +242,7 @@ public class MeterControllerIntegrationTest {
         Integer year = 2021;
         Integer month = 1;
         Integer energyConsumed = 15;
-        mockMvc.perform(post("/api/meter/reading")
+        mockMvc.perform(post("/api/v1/meters/reading")
                 .content(asJsonString(new MeterReadingDTO(year, month, energyConsumed, id)))
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
@@ -256,7 +256,7 @@ public class MeterControllerIntegrationTest {
     @ParameterizedTest
     @MethodSource("provideMeterReadingDTOsAndMessagesForSaving")
     void saveMeterReading_shouldReturnExceptionMessage(MeterReadingDTO meterReadingDTO, String message) throws Exception {
-        mockMvc.perform(post("/api/meter/reading")
+        mockMvc.perform(post("/api/v1/meters/reading")
                         .content(asJsonString(meterReadingDTO))
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
@@ -270,7 +270,7 @@ public class MeterControllerIntegrationTest {
         Integer year = 2020;
         Integer month = 1;
         Integer energyConsumed = 20;
-        mockMvc.perform(put("/api/meter/reading")
+        mockMvc.perform(put("/api/v1/meters/reading")
                         .content(asJsonString(new MeterReadingDTO(year, month, energyConsumed, id)))
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
@@ -284,7 +284,7 @@ public class MeterControllerIntegrationTest {
     @ParameterizedTest
     @MethodSource("provideMeterReadingDTOsAndMessagesForUpdating")
     void updateMeterReading_shouldReturnExceptionMessage(MeterReadingDTO meterReadingDTO, String message) throws Exception {
-        mockMvc.perform(put("/api/meter/reading")
+        mockMvc.perform(put("/api/v1/meters/reading")
                         .content(asJsonString(meterReadingDTO))
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
@@ -334,7 +334,7 @@ public class MeterControllerIntegrationTest {
 
     @Test
     void deleteMeterReadingById_deletedSuccessfully() throws Exception {
-        mockMvc.perform(delete("/api/meter/reading/1"))
+        mockMvc.perform(delete("/api/v1/meters/reading/1"))
                 .andExpect(status().isOk());
     }
 
@@ -344,7 +344,7 @@ public class MeterControllerIntegrationTest {
             "100, Meter reading with id 100 does not exist"
     }, nullValues = {"null"})
     void deleteMeterReadingById_shouldThrowException(Long meterReadingId, String message) throws Exception {
-        mockMvc.perform(delete("/api/meter/reading/{id}", meterReadingId))
+        mockMvc.perform(delete("/api/v1/meters/reading/{id}", meterReadingId))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message").value(message));
     }

@@ -15,7 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/meter")
+@RequestMapping("/api/v1/meters")
 public class MeterController {
 
     private final MeterService service;
@@ -56,7 +56,7 @@ public class MeterController {
                     content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = ApiExceptionResponse.class))})
     })
-    @GetMapping("/{id}/consumption/aggregation/year/{year}")
+    @GetMapping("/{id}/consumption/aggregation/{year}")
     public ResponseEntity<MeterReadingDTO> aggregateConsumptionByMeterIdAndYear(
             @PathVariable @Parameter(description = "Meter id", example = "1") Long id,
             @PathVariable @Parameter(description = "Year", example = "2020") Integer year) {
@@ -95,7 +95,7 @@ public class MeterController {
                     content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = ApiExceptionResponse.class))})
     })
-    @GetMapping("/{id}/year/{year}")
+    @GetMapping("/{id}/{year}")
     public ResponseEntity<MeterReadingDTO> findByMeterIdAndYear(
             @PathVariable @Parameter(description = "Meter id", example = "1") Long id,
             @PathVariable @Parameter(description = "Year", example = "2020") Integer year) {
@@ -135,7 +135,7 @@ public class MeterController {
                     content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = ApiExceptionResponse.class))})
     })
-    @GetMapping("/{id}/year/{year}/month/{month}")
+    @GetMapping("/{id}/{year}/{month}")
     public ResponseEntity<MeterReadingDTO> findByMeterIdAndYearAndMonth(
             @PathVariable @Parameter(description = "Meter id", example = "1") Long id,
             @PathVariable @Parameter(description = "Year", example = "2020") Integer year,
@@ -242,10 +242,5 @@ public class MeterController {
             @Parameter(description = "Meter reading id", example = "1") Long id) {
         service.deleteMeterReadingById(id);
         return ResponseEntity.ok(null);
-    }
-
-    @GetMapping("/reading/message")
-    public ResponseEntity getMessage() {
-        return ResponseEntity.ok("I'm returning a messages to the user");
     }
 }

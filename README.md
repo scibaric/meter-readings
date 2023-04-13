@@ -16,7 +16,7 @@ the last command. JAR can be started with command
 `java -jar ./target/meter-readings-0.0.1-SNAPSHOT.jar`. You should be able
 to access the REST service endpoints through browser or Postman. Service
 starts on localhost and port 8080, testing URLs are:
-- http://localhost:8080/api/meter/1/consumption/aggregation/year/2020
+- http://localhost:8080/api/v1/meters/1/consumption/aggregation/2020
   * Produces JSON
     ```
     {
@@ -24,7 +24,7 @@ starts on localhost and port 8080, testing URLs are:
       "total": 195
     }
     ```
-- http://localhost:8080/api/meter/1/year/2020 
+- http://localhost:8080/api/v1/meters/1/2020 
   * Produces JSON
     ```
     {
@@ -45,7 +45,7 @@ starts on localhost and port 8080, testing URLs are:
       }
     }
     ```
-- http://localhost:8080/api/meter/1/year/2020/month/1
+- http://localhost:8080/api/v1/meters/1/2020/1
   * Produces JSON
     ```
     {
@@ -56,7 +56,7 @@ starts on localhost and port 8080, testing URLs are:
     }
     ```
 
-Endpoint for saving meter reading is `/api/meter/reading` and it expects
+Endpoint for saving meter reading is `/api/v1/meters/reading` and it expects
 JSON object, the same object is returned.
 ```
 {
