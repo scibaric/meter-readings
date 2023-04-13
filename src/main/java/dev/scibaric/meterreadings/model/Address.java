@@ -35,6 +35,14 @@ public class Address {
     public Address() {
     }
 
+    public Address(Long id, String street, String houseNo, String city, Client client) {
+        this.id = id;
+        this.street = street;
+        this.houseNo = houseNo;
+        this.city = city;
+        this.client = client;
+    }
+
     public Address(Long id, String street, String houseNo, String city) {
         this.id = id;
         this.street = street;
