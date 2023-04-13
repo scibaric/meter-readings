@@ -29,6 +29,10 @@ public class Meter {
         this.id = id;
     }
 
+    public Meter(Client client) {
+        this.client = client;
+    }
+
     public Meter(Long id, Client client) {
         this.id = id;
         this.client = client;

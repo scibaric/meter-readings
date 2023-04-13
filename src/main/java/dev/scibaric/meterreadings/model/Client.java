@@ -18,13 +18,22 @@ public class Client {
     @Column(name = "NAME", nullable = false)
     private String name;
 
-    @OneToOne(mappedBy = "client", fetch = FetchType.LAZY)
+    @OneToOne(mappedBy = "client")
     private Address address;
 
-    @OneToOne(mappedBy = "client", fetch = FetchType.LAZY)
+    @OneToOne(mappedBy = "client")
     private Meter meter;
 
     public Client() {
+    }
+
+    public Client(Long id) {
+        this.id = id;
+    }
+
+    public Client(Long id, String name) {
+        this.id = id;
+        this.name = name;
     }
 
     public Client(Long id, String name, Address address) {

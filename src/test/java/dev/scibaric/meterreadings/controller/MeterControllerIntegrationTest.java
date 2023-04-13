@@ -2,7 +2,15 @@ package dev.scibaric.meterreadings.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.scibaric.meterreadings.dto.MeterReadingDTO;
-import org.junit.jupiter.api.Test;
+import dev.scibaric.meterreadings.model.Address;
+import dev.scibaric.meterreadings.model.Client;
+import dev.scibaric.meterreadings.model.Meter;
+import dev.scibaric.meterreadings.model.MeterReading;
+import dev.scibaric.meterreadings.repository.AddressRepository;
+import dev.scibaric.meterreadings.repository.ClientRepository;
+import dev.scibaric.meterreadings.repository.MeterReadingRepository;
+import dev.scibaric.meterreadings.repository.MeterRepository;
+import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -12,27 +20,103 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
-import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.transaction.annotation.Transactional;
+import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.time.Month;
 import java.time.Year;
 import java.time.format.TextStyle;
+import java.util.List;
 import java.util.Locale;
 import java.util.stream.Stream;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+@Transactional
+@Testcontainers
 @SpringBootTest
 @AutoConfigureMockMvc
-@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
-class MeterControllerIntegrationTest {
+@ActiveProfiles("test")
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
+public class MeterControllerIntegrationTest {
+
+    @Autowired
+    private AddressRepository addressRepository;
+
+    @Autowired
+    private ClientRepository clientRepository;
+
+    @Autowired
+    private MeterRepository meterRepository;
+
+    @Autowired
+    private MeterReadingRepository meterReadingRepository;
 
     @Autowired
     private MockMvc mockMvc;
 
-    @Test()
+    @BeforeAll
+    public void setUp() {
+        clientRepository.saveAll(
+                List.of(
+                        new Client(1L, "Luka Modric"),
+                        new Client(2L, "Mateo Kovacic"),
+                        new Client(3L, "Josko Gvardiol")
+                )
+        );
+
+
+        meterRepository.saveAll(
+                List.of(
+                        new Meter(1L, new Client(1L)),
+                        new Meter(2L, new Client(2L)),
+                        new Meter(3L, new Client(3L))
+                )
+        );
+
+        addressRepository.saveAll(
+                List.of(
+                        new Address(1L, "Ilica", "10", "Zagreb", new Client(1L)),
+                        new Address(2L, "Maksimirska", "8", "Zagreb", new Client(2L)),
+                        new Address(3L, "Jurisiceva", "20", "Zagreb", new Client(3L))
+                )
+        );
+
+        meterReadingRepository.saveAll(
+                List.of(
+                        new MeterReading(1L, new Meter(1L), 2020, 1, 11),
+                        new MeterReading(2L, new Meter(1L), 2020, 2, 14),
+                        new MeterReading(3L, new Meter(1L), 2020, 3, 9),
+                        new MeterReading(4L, new Meter(1L), 2020, 4, 23),
+                        new MeterReading(5L, new Meter(1L), 2020, 5, 16),
+                        new MeterReading(6L, new Meter(1L), 2020, 6, 18),
+                        new MeterReading(7L, new Meter(1L), 2020, 7, 12),
+                        new MeterReading(8L, new Meter(1L), 2020, 8, 17),
+                        new MeterReading(9L, new Meter(1L), 2020, 9, 8),
+                        new MeterReading(10L, new Meter(1L), 2020, 10, 25),
+                        new MeterReading(11L, new Meter(1L), 2020, 11, 20),
+                        new MeterReading(12L, new Meter(1L), 2020, 12, 22),
+                        new MeterReading(13L, new Meter(2L), 2020, 1, 7),
+                        new MeterReading(14L, new Meter(2L), 2020, 2, 15),
+                        new MeterReading(15L, new Meter(2L), 2020, 3, 12),
+                        new MeterReading(16L, new Meter(2L), 2020, 4, 19),
+                        new MeterReading(17L, new Meter(2L), 2020, 5, 13),
+                        new MeterReading(18L, new Meter(2L), 2020, 6, 11),
+                        new MeterReading(19L, new Meter(2L), 2020, 7, 16),
+                        new MeterReading(20L, new Meter(2L), 2020, 8, 24),
+                        new MeterReading(21L, new Meter(2L), 2020, 9, 29),
+                        new MeterReading(22L, new Meter(2L), 2020, 10, 8),
+                        new MeterReading(23L, new Meter(2L), 2020, 11, 14),
+                        new MeterReading(24L, new Meter(2L), 2020, 12, 15)
+                )
+        );
+
+    }
+
+    @Test
     void aggregateConsumptionByMeterIdAndYear_whenReadingExists_thenReturnResult() throws Exception {
         mockMvc.perform(get("/api/meter/1/consumption/aggregation/year/2020"))
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -134,7 +218,7 @@ class MeterControllerIntegrationTest {
     void findByMeterIdAndYearAndMonth_whenReadingDoesNotExist_thenReturnExceptionMessage() throws Exception {
         Long id = 1L;
         Integer year = 2021;
-        Integer month = 12;
+        int month = 12;
         String m = Month.of(month).getDisplayName(TextStyle.FULL, Locale.ENGLISH);
         mockMvc.perform(get("/api/meter/{id}/year/{year}/month/{month}", id, year, month))
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -214,24 +298,22 @@ class MeterControllerIntegrationTest {
         Integer month = 2;
         Integer energyConsumed = 15;
         String m = Month.of(2).getDisplayName(TextStyle.FULL, Locale.ENGLISH);
-        Stream<Arguments> arguments = Stream.concat(provideMeterReadingDTOsAndMessages(),
+
+        return Stream.concat(provideMeterReadingDTOsAndMessages(),
                 Stream.of(Arguments.of(new MeterReadingDTO(year, month, energyConsumed, meterId),
                 String.format("Meter reading for meter id %d, year %d and month %s already exists", meterId, year, m))));
-
-        return arguments;
     }
 
     private static Stream<Arguments> provideMeterReadingDTOsAndMessagesForUpdating() {
         Long meterId = 1L;
         Integer year = 2021;
-        Integer month = 2;
+        int month = 2;
         Integer energyConsumed = 15;
         String m = Month.of(month).getDisplayName(TextStyle.FULL, Locale.ENGLISH);
-        Stream<Arguments> arguments = Stream.concat(provideMeterReadingDTOsAndMessages(),
+
+        return Stream.concat(provideMeterReadingDTOsAndMessages(),
                 Stream.of(Arguments.of(new MeterReadingDTO(year, month, energyConsumed, meterId),
                         String.format("Meter reading for meter id %d, year %d and month %s does not exist", meterId, year, m))));
-
-        return arguments;
     }
 
     private static Stream<Arguments> provideMeterReadingDTOsAndMessages() {
