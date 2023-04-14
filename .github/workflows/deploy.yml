@@ -36,7 +36,7 @@ jobs:
           context: .
           platforms: linux/amd64,linux/arm64
           push: true
-          tags: sebcibaric/meter-readings:${{ github.sha }}
+          tags: sebcibaric/meter-readings:latest
 
   deploy:
     runs-on: ubuntu-latest
@@ -58,5 +58,3 @@ jobs:
             .manifests/deployment.yml
             .manifests/service.yml
             .manifests/ingress.yml
-          images: |
-            docker.io/sebcibaric/meter-readings:${{ github.sha }}
