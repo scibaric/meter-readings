@@ -2,7 +2,7 @@ package dev.scibaric.meterreadings.model;
 
 import lombok.Data;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 import java.util.Set;
 
 @Data
