@@ -16,6 +16,6 @@ spec:
     spec:
       containers:
         - name: meter-readings
-          image: sebcibaric/meter-readings:latest
+          image: sebcibaric/meter-readings
           ports:
             - containerPort: 8080
