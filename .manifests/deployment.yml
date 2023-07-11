@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: meter-readings
-          image: sebcibaric/meter-readings:latest
+          image: docker.io/sebcibaric/meter-readings:latest
           readinessProbe:
             httpGet:
               path: /actuator/health/readiness
