@@ -26,12 +26,16 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
+      - name: Setting value in SHORT_SHA variable
+        run: |
+          echo "short_sha=$(git rev-parse --short HEAD)" >> "$GITHUB_ENV"
+
       - name: Build and push
         uses: docker/build-push-action@v4
         with:
           context: .
           push: true
-          tags: sebcibaric/meter-readings:${{ github.sha }}
+          tags: sebcibaric/meter-readings:${{ env.short_sha }}
 
   deploy:
     runs-on: ubuntu-latest
@@ -54,4 +58,4 @@ jobs:
             .manifests/service.yml
             .manifests/ingress.yml
           images: |
-            docker.io/sebcibaric/meter-readings:${{ github.sha }}
+            docker.io/sebcibaric/meter-readings:${{ env.short_sha }}
