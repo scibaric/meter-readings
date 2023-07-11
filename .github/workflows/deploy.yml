@@ -9,6 +9,9 @@ jobs:
   build:
     runs-on: buildjet-2vcpu-ubuntu-2204-arm
 
+    outputs:
+      short_sha: ${{ steps.set_short_sha.outputs.short_sha }}
+
     steps:
       - uses: actions/checkout@v3
       - name: Set up JDK 17
@@ -27,15 +30,16 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Setting value in SHORT_SHA variable
+        id: set_short_sha
         run: |
-          echo "short_sha=$(git rev-parse --short HEAD)" >> "$GITHUB_ENV"
+          echo "short_sha=$(git rev-parse --short HEAD)" >> "$GITHUB_OUTPUT"
 
       - name: Build and push
         uses: docker/build-push-action@v4
         with:
           context: .
           push: true
-          tags: sebcibaric/meter-readings:${{ env.short_sha }}
+          tags: sebcibaric/meter-readings:${{ steps.set_short_sha.outputs.short_sha }}
 
   deploy:
     runs-on: ubuntu-latest
@@ -58,4 +62,4 @@ jobs:
             .manifests/service.yml
             .manifests/ingress.yml
           images: |
-            docker.io/sebcibaric/meter-readings:${{ env.short_sha }}
+            docker.io/sebcibaric/meter-readings:${{ needs.build.outputs.short_sha }}
