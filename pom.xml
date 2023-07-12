@@ -111,7 +111,18 @@
                 <groupId>io.github.git-commit-id</groupId>
                 <artifactId>git-commit-id-maven-plugin</artifactId>
             </plugin>
+            <plugin>
+                <groupId>org.graalvm.buildtools</groupId>
+                <artifactId>native-maven-plugin</artifactId>
+                <configuration>
+                    <imageName>app</imageName>
+                    <mainClass>dev.scibaric.meterreadings.MeterReadingsApplication</mainClass>
+                    <buildArgs>
+                        <buildArg>--static</buildArg>
+                        <buildArg>--libc=musl</buildArg>
+                    </buildArgs>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
-
 </project>
