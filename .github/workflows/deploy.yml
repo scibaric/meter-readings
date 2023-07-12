@@ -20,7 +20,7 @@ jobs:
           java-version: '17.0.7'
           version: 'latest'
           distribution: 'graalvm'
-          native-image-musl: 'true'
+#          native-image-musl: 'true'
           github-token: ${{ secrets.GITHUB_TOKEN }}
           cache: 'maven'
       - name: Build with Maven
