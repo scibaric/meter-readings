@@ -7,7 +7,7 @@ on:
 
 jobs:
   build:
-    runs-on: buildjet-2vcpu-ubuntu-2204-arm
+    runs-on: ubuntu-latest
 
     outputs:
       short_sha: ${{ steps.set_short_sha.outputs.short_sha }}
@@ -20,7 +20,7 @@ jobs:
           java-version: '17.0.7'
           version: 'latest'
           distribution: 'graalvm'
-#          native-image-musl: 'true'
+          native-image-musl: 'true'
           github-token: ${{ secrets.GITHUB_TOKEN }}
           cache: 'maven'
       - name: Build with Maven
