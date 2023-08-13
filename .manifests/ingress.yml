@@ -4,9 +4,9 @@ metadata:
   name: meter-readings-ingress
   namespace: meter-readings
   annotations:
-    kubernetes.io/ingress.class: traefik
     cert-manager.io/cluster-issuer: letsencrypt-prod
 spec:
+  ingressClassName: traefik
   tls:
     - secretName: meter-readings-scibaric-dev-tls
       hosts:
