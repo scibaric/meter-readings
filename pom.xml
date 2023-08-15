@@ -105,6 +105,17 @@
                             <artifactId>lombok</artifactId>
                         </exclude>
                     </excludes>
+                    <mainClass>dev.scibaric.meterreadings.MeterReadingsApplication</mainClass>
+                    <image>
+                        <name>docker.io/sebcibaric/meter-readings:${git.commit.id.abbrev}</name>
+                        <publish>true</publish>
+                    </image>
+                    <docker>
+                        <publishRegistry>
+                            <username>${env.DOCKERHUB_USERNAME}</username>
+                            <password>${env.DOCKERHUB_TOKEN}</password>
+                        </publishRegistry>
+                    </docker>
                 </configuration>
             </plugin>
             <plugin>
